@@ -1,30 +1,112 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+    <div class="wrapper">
+        <h1>Погодное приложение </h1>
+        <p>Узнать погоду в {{ city == "" ? "вашем городе" :  city  }}</p>
+        <input type="text" v-model="city" placeholder="Введите город">
+        <button v-if="city != ''" @click="getWeather()">Получить погоду</button>
+        <button disabled v-else>Введите название города</button>
+        <p class="error">{{ error }}</p>
+        <div v-if="info != null" >
+            <p>{{ showTemp }}</p>
+            <p>{{ showFeelsLike }}</p>
+            <p>{{ showMinTemp }}</p>
+            <p>{{ showMaxTemp }}</p>            
+        </div>
+       
+    
+    </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<script>
+import axios from 'axios'
+
+    export default {
+        data () {
+            return {
+                city: "",
+                error: "" ,
+                info: null
+            }
+        },
+        computed: {
+            showTemp() {
+                return "Температура в данном городе: " + this.info.main.temp
+            },
+            showFeelsLike() {
+                return "Ощущается как: " + this.info.main.feels_like
+            },
+            showMinTemp() {
+                return "Минимальная температура: " + this.info.main.temp_min
+            },
+            showMaxTemp() {
+                return "Максимальная температура: " + this.info.main.temp_max
+            }
+        },
+        methods: {
+            getWeather() {
+                if (this.city.trim().length < 2){
+                    this.error = "Нужно название более одного символа :)"
+                    return false
+                }
+                this.error = ""
+
+                axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${this.city}&units=metric&appid=57ba267867637c0932b604e9ec97e1cf`)
+                    .then(res => (this.info = res.data))
+            }
+        }
+    }
+</script>
+
+<style scoped>
+.error {
+    color: #d03939;
+}
+.wrapper {
+    width: 900px;
+    height: 500px;
+    border-radius: 50px;
+    padding: 20px;
+    background: #1f0f24;
+    text-align: center;
+    color: white;
+    font-family: Montserrat;
 }
 
-nav {
-  padding: 30px;
+.wrapper h1 {
+    margin-top: 50px;
+}
+.wrapper p {
+    margin-top: 20px;
+}
+.wrapper input {
+    margin-top: 30px;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid #110813;
+    color: #fcfcfc;
+    font-size: 14px;
+    padding: 5px 8px;
+    outline: none;
+}
+.wrapper input:focus {
+    border-bottom-color: #6e2d7d;
 }
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
+.wrapper button {
+    background: #e3bc4b;
+    color: white;
+    border-radius: 10px;
+    border: 2px solid #b99935;
+    padding: 10px 15px;
+    margin-left: 20px;
+    cursor: pointer;
+    transition: transform 500ms ease;
+}
+.wrapper button:hover {
+    transform: scale(1.1) translateY(-5px);
 }
 
-nav a.router-link-exact-active {
-  color: #42b983;
+.wrapper button:disabled {
+    background: transparent;
 }
 </style>
